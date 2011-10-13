@@ -56,20 +56,22 @@ describe "fuzzy_search" do
     refute_empty Email.fuzzy_search("oscar")
   end
 
-  it "normalizes strings before searching on them or indexing them" do
+  it "can normalize strings" do
     assert_equal("aaaaaa", Person.normalize("ÀÁÂÃÄÅ"))
+  end
 
-    assert_equal 4, Person.fuzzy_search("chris").size
-    assert_equal 1, Person.fuzzy_search("muell").size
+  it "normalizes strings before searching on them" do
     assert_equal 1, Person.fuzzy_search("Müll").size
-    assert_equal 1, Person.fuzzy_search("mull").size
     assert_equal 1, Email.fuzzy_search("öscar").size
+  end
+
+  it "normalizes record strings before indexing them" do
     assert_equal 1, Email.fuzzy_search("oscar").size
   end
 
-  it "deletes search index entries when a record is deleted" do
+  it "destroys search index entries when a record is destroyed" do
     size = Person.fuzzy_search("other").size
-    assert size > 0, "some entries"
+    assert size > 0
     Person.destroy_all(:last_name => "öther")
     assert_equal size, Person.fuzzy_search("other").size + 1
   end
