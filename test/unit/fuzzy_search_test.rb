@@ -46,12 +46,14 @@ describe "fuzzy_search" do
   end
 
   it "only finds records of the ActiveRecord model you're searching on" do
-    assert Person.fuzzy_search("meier").size > 0
-    assert_equal 0, Email.fuzzy_search("meier").size
-    assert Person.fuzzy_search("kristian").size > 0
-    assert_equal 0, Email.fuzzy_search("kristian").size
-    assert_equal 0, Person.fuzzy_search("oscar").size
-    assert Email.fuzzy_search("oscar").size > 0
+    refute_empty Person.fuzzy_search("meier")
+    assert_empty Email.fuzzy_search("meier")
+
+    refute_empty Person.fuzzy_search("kristian")
+    assert_empty Email.fuzzy_search("kristian")
+
+    assert_empty Person.fuzzy_search("oscar")
+    refute_empty Email.fuzzy_search("oscar")
   end
 
   it "normalizes strings before searching on them or indexing them" do
