@@ -4,11 +4,16 @@ Search through your models while tolerating slight mis-spellings. If you have a 
 
 This gem is not as powerful as dedicated search tools like Solr, but it's much quicker and easier to set up. It uses your regular database for indexing, rather than an external service that has to be maintained separately.
 
+Currently only Rails 2 is supported. I welcome any contributions that resolve this!
+
 ## Installation
 
 Add `fuzzy_search` to your Rails project's Gemfile, and do the usual `bundle install` dance.
 
-Then, use the generator to create a 
+Then, run the generator and migrate to create the search table:
+
+    $ ./script/generate fuzzy_search_setup
+    $ rake db:migrate
 
 ## Example
 

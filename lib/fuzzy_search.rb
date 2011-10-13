@@ -10,8 +10,8 @@ module ActiveRecord # :nodoc:
   end
 end
 
+require 'fuzzy_model_extensions'
 require 'fuzzy_search_trigram'
 require 'fuzzy_search_ver'
-require 'model_extensions'
 
 ActiveRecord::Base.send(:include, FuzzySearch::ModelExtensions)
