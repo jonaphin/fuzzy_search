@@ -17,7 +17,6 @@ ensure
 end
 
 require 'rubygems'
-require 'minitest'
 require 'minitest/autorun'
 require 'redgreen'
 
@@ -59,7 +58,6 @@ module MiniTest
     end
   end
 end
-
 
 require 'factories'
 MiniTest::Unit::TestCase.send(:include, Factory::Syntax::Methods)

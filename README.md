@@ -24,7 +24,7 @@ end
 Now, the gem will update the index whenever a Person is saved. To index all the existing records in a model, do this:
 
 ```ruby
-Person.rebuild_fuzzy_search_index
+Person.rebuild_fuzzy_search_index!
 ```
 
 The fuzzy_search method returns arrays:

@@ -2,17 +2,17 @@ require File.expand_path(File.dirname(__FILE__) + '/../test_helper')
 
 describe "fuzzy_search" do
   before do 
-    create(:user, "meier", "kristian")
-    create(:user, "meyer", "christian")
-    create(:user, "mayr", "Chris")
-    create(:user, "maier", "christoph")
-    create(:user, "mueller", "andreas")
-    create(:user, "öther", "name")
-    create(:user, "yet another", "name")
+    create(:person, :last_name => "meier", :first_name => "kristian")
+    create(:person, :last_name => "meyer", :first_name => "christian")
+    create(:person, :last_name => "mayr", :first_name => "Chris")
+    create(:person, :last_name => "maier", :first_name => "christoph")
+    create(:person, :last_name => "mueller", :first_name => "andreas")
+    create(:person, :last_name => "öther", :first_name => "name")
+    create(:person, :last_name => "yet another", :first_name => "name")
 
-    create(:email, "öscar@web.oa")
-    create(:email, "david.mike.simon@gmail.com")
-    create(:email, "billg@microsoft.com")
+    create(:email, :address => "öscar@web.oa")
+    create(:email, :address => "david.mike.simon@gmail.com")
+    create(:email, :address => "billg@microsoft.com")
   end
 
   it "can search an indexed ActiveRecord model for similar strings" do
