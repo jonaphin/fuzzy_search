@@ -57,7 +57,6 @@ describe "fuzzy_search" do
     assert_equal 1, Person.fuzzy_search("muell").size
     assert_equal 1, Person.fuzzy_search("Müll").size
     assert_equal 1, Person.fuzzy_search("mull").size
-    assert_equal 1, Person.fuzzy_search("other").size
     assert_equal 1, Email.fuzzy_search("öscar").size
     assert_equal 1, Email.fuzzy_search("oscar").size
   end
