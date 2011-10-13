@@ -44,6 +44,7 @@ describe "fuzzy_search" do
 
   it "returns an empty result set when given an empty query string" do
     assert_empty Person.fuzzy_search("")
+    assert_empty Person.fuzzy_search(nil)
   end
 
   it "updates the index automatically when a new record is saved" do
