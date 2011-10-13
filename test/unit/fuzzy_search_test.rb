@@ -31,6 +31,9 @@ describe "fuzzy_search" do
     (1..3).each do |idx|
       assert result[idx].fuzzy_weight < 100
     end
+  end
+
+  it "returns an empty results set when given an empty query string" do
     assert_equal 0, Person.fuzzy_search("").size
   end
 
