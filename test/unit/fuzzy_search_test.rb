@@ -47,12 +47,29 @@ describe "fuzzy_search" do
     assert_empty Person.fuzzy_search(nil)
   end
 
-  it "updates the index automatically when a new record is saved" do
-    # TODO
+  it "updates the search index automatically when a new record is saved" do
+    assert_empty Person.fuzzy_search("Dave")
+    create(:person, :first_name => "David", :last_name => "Simon")
+    refute_empty Person.fuzzy_search("Dave")
   end
 
-  it "updates the index automatically when a record is updated" do
-    # TODO
+  it "updates the search index automatically when a record is updated" do
+    assert_empty Person.fuzzy_search("Obama")
+    refute_empty Person.fuzzy_search("yet")
+
+    p = Person.find_by_last_name("yet another")
+    p.last_name = "Obama"
+    p.save!
+
+    refute_empty Person.fuzzy_search("Obama")
+    assert_empty Person.fuzzy_search("yet")
+  end
+
+  it "destroys search index entries when a record is destroyed" do
+    size = Person.fuzzy_search("other").size
+    assert size > 0
+    Person.destroy_all(:last_name => "öther")
+    assert_equal size, Person.fuzzy_search("other").size + 1
   end
 
   it "only finds records of the ActiveRecord model you're searching on" do
@@ -74,13 +91,6 @@ describe "fuzzy_search" do
 
   it "normalizes record strings before indexing them" do
     assert_equal 1, Email.fuzzy_search("oscar").size
-  end
-
-  it "destroys search index entries when a record is destroyed" do
-    size = Person.fuzzy_search("other").size
-    assert size > 0
-    Person.destroy_all(:last_name => "öther")
-    assert_equal size, Person.fuzzy_search("other").size + 1
   end
 
   it "can search through a scope" do
