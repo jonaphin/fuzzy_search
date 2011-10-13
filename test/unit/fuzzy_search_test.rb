@@ -94,6 +94,8 @@ describe "fuzzy_search" do
   end
 
   it "can search through a scope" do
-    # TODO
+    scope = Person.scoped({:conditions => {:hobby => "Bicycling"}})
+    assert_equal 4, Person.fuzzy_search("chris").size
+    assert_equal 2, scope.fuzzy_search("chris").size
   end
 end
