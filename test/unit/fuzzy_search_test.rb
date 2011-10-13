@@ -21,10 +21,13 @@ describe "fuzzy_search" do
     FuzzySearchTrigram.delete_all
   end
 
-  it "can search an indexed ActiveRecord model for similar strings" do
+  it "can search for records with similar strings to a query" do
     assert_equal 3, Person.fuzzy_search("meyr").size
     assert_equal 1, Person.fuzzy_search("myr").size
-    result = Person.fuzzy_search("kristian meier")
+  end
+  
+  it "can search on multiple columns" do
+    result = Person.fuzzy_search("kristin meiar")
     assert_equal "kristian", result[0].first_name
     assert_equal "meier", result[0].last_name
   end
@@ -37,7 +40,7 @@ describe "fuzzy_search" do
     end
   end
 
-  it "returns an empty results set when given an empty query string" do
+  it "returns an empty result set when given an empty query string" do
     assert_equal 0, Person.fuzzy_search("").size
   end
 
