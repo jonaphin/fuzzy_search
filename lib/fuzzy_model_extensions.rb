@@ -26,6 +26,13 @@ module FuzzySearch
         fuzzy_search_scope(words).all
       end
 
+      def rebuild_fuzzy_search_index!
+        FuzzySearchTrigram.delete_all(:rec_type => self.class.name)
+        all.each do |rec|
+          rec.update_fuzzy_search_trigrams!
+        end
+      end
+
       private
 
       def generate_fuzzy_search_scope_params(words)

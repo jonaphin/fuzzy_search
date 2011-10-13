@@ -98,4 +98,11 @@ describe "fuzzy_search" do
     assert_equal 4, Person.fuzzy_search("chris").size
     assert_equal 2, scope.fuzzy_search("chris").size
   end
+
+  it "can rebuild the search index from scratch" do
+    FuzzySearchTrigram.delete_all
+    assert_empty Person.fuzzy_search("chris")
+    Person.rebuild_fuzzy_search_index!
+    refute_empty Person.fuzzy_search("chris")
+  end
 end
