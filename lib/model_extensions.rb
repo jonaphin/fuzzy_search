@@ -7,7 +7,7 @@ module FuzzySearch
       base.class_inheritable_reader :fuzzy_search_properties
 
       base.write_inheritable_attribute :fuzzy_search_threshold, 5
-      base.class_inheritable_reader :fuzzy_search_treshold
+      base.class_inheritable_reader :fuzzy_search_threshold
     end
 
     module ClassMethods
@@ -50,14 +50,14 @@ module FuzzySearch
         # Has to be used multiple times because some databases (i.e. Postgres) do not support HAVING on named SELECT fields
         # TODO: See if we can't get the count(*) out of here, that's a non-trivial operation in some databases
         fuzzy_weight_expr = "(((count(*)*100.0)/#{trigrams.size}) + " +
-          "((count(*)*100.0)/(SELECT count(*) FROM fuzzy_search_trigrams WHERE rec_id = #{table_name}.#{primary_key} AND rec_type = '#{class_name}')))/2.0"
+          "((count(*)*100.0)/(SELECT count(*) FROM fuzzy_search_trigrams WHERE rec_id = #{table_name}.#{primary_key} AND rec_type = '#{name}')))/2.0"
 
         # TODO: Optimize this query. In a large trigram table, this is going to go through a lot of dead ends.
         # Maybe I need to just bite the bullet and learn how to do procedures? That would break cross-database compatibility, though...
         return {
           :select => "#{fuzzy_weight_expr} AS fuzzy_weight, #{entity_fields}",
           :joins => ["LEFT OUTER JOIN fuzzy_search_trigrams ON fuzzy_search_trigrams.rec_id = #{table_name}.#{primary_key}"],
-          :conditions => ["fuzzy_search_trigrams.token IN (?) AND rec_type = '#{class_name}'", trigrams],
+          :conditions => ["fuzzy_search_trigrams.token IN (?) AND rec_type = '#{name}'", trigrams],
           :group => "#{table_name}.#{primary_key}",
           :order => "fuzzy_weight DESC",
           :having => "#{fuzzy_weight_expr} >= #{fuzzy_search_threshold}"
@@ -73,11 +73,11 @@ module FuzzySearch
 
     module InstanceMethods
       def update_fuzzy_search_trigrams!
-        self.class.connection.execute "DELETE FROM fuzzy_search_trigrams WHERE rec_id = #{self.id} AND rec_type = '#{self.class.class_name}'"
+        FuzzySearchTrigram.delete_all(:rec_id => self.id, :rec_type => self.class.name)
 
         # to avoid double entries
         tokens = []
-        self.class.fuzzy_props.each do |prop|
+        self.class.fuzzy_search_properties.each do |prop|
           prop_value = send(prop)
           next if prop_value.nil?
           # split the property into words (which are separated by whitespaces)
@@ -93,10 +93,11 @@ module FuzzySearch
           end
         end
 
-        # Ugh, this is bringing me back to my PHP days. But this is still better than N queries.
-        q = "INSERT INTO fuzzy_search_trigrams(token, rec_id, rec_type) VALUES "
-        q += tokens.map{|t| "(#{t},#{self.id},'#{self.class.class_name}')"}.join(",")
-        self.class.connection.execute q
+        FuzzySearchTrigram.import(
+          [:token, :rec_id, :rec_type],
+          tokens.map{|t| [t, self.id, self.class.name]},
+          :validate => false
+        )
       end
     end
   end

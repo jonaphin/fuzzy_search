@@ -71,6 +71,8 @@ gemspec = Gem::Specification.new do |s|
   s.platform     = Gem::Platform::RUBY
   s.require_path = 'lib'
   s.rubyforge_project = '[none]'
+
+  s.add_dependency('ar-extensions', '0.9.5')
 end
 
 Gem::PackageTask.new(gemspec) do |pkg|
