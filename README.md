@@ -12,22 +12,26 @@ Then, use the generator to create a
 
 ## Example
 
+To allow a model to be searched, specify which columns are to be indexed:
 ```ruby
 class Person < ActiveRecord::Base
     # ...
-    # Specify which columns are to be indexed:
     fuzzy_searchable_on :name, :surname
     # ...
 end
-
-# Now, the gem will update the index whenever a Person is saved.
-# To index all the existing records in a model, do this:
+```
+Now, the gem will update the index whenever a Person is saved. To index all the existing records in a model, do this:
+```ruby
 Person.rebuild_fuzzy_search_index
+```
 
-# The fuzzy_search method returns arrays:
+The fuzzy_search method returns arrays:
+```ruby
 people = Person.fuzzy_search "OReilly"
+```
 
-# Fuzzy find works on scopes too, including named_scopes and on-the-fly scopes:
+Fuzzy find works on scopes too, including named_scopes and on-the-fly scopes:
+```ruby
 people = Person.scoped({:conditions => ["state='active'"]}).fuzzy_search("OReilly")
 ```
 
