@@ -3,9 +3,9 @@ require File.expand_path(File.dirname(__FILE__) + '/../test_helper')
 describe "fuzzy_search" do
   before do 
     create(:person, :last_name => "meier", :first_name => "kristian")
-    create(:person, :last_name => "meyer", :first_name => "christian")
+    create(:person, :last_name => "meyer", :first_name => "christian", :hobby => "Bicycling")
     create(:person, :last_name => "mayr", :first_name => "Chris")
-    create(:person, :last_name => "maier", :first_name => "christoph")
+    create(:person, :last_name => "maier", :first_name => "christoph", :hobby => "Bicycling")
     create(:person, :last_name => "mueller", :first_name => "andreas")
     create(:person, :last_name => "öther", :first_name => "name")
     create(:person, :last_name => "yet another", :first_name => "name")
@@ -35,25 +35,28 @@ describe "fuzzy_search" do
   it "sorts results by their fuzzy match score" do
     result = Person.fuzzy_search("kristian meier")
     assert_equal 100, result[0].fuzzy_score
+    prior = 100
     (1..3).each do |idx|
-      assert result[idx].fuzzy_score < 100
+      assert result[idx].fuzzy_score <= prior
+      prior = result[idx].fuzzy_score
     end
   end
 
   it "returns an empty result set when given an empty query string" do
-    assert_equal 0, Person.fuzzy_search("").size
+    assert_empty Person.fuzzy_search("")
   end
 
-  it "updates the index automatically when a record is saved" do
+  it "updates the index automatically when a new record is saved" do
+    # TODO
+  end
+
+  it "updates the index automatically when a record is updated" do
     # TODO
   end
 
   it "only finds records of the ActiveRecord model you're searching on" do
     refute_empty Person.fuzzy_search("meier")
     assert_empty Email.fuzzy_search("meier")
-
-    refute_empty Person.fuzzy_search("kristian")
-    assert_empty Email.fuzzy_search("kristian")
 
     assert_empty Person.fuzzy_search("oscar")
     refute_empty Email.fuzzy_search("oscar")
