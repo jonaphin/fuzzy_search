@@ -29,9 +29,10 @@ module FuzzySearch
       private
 
       def generate_fuzzy_search_scope_params(words)
-        return {} unless words != nil
+        no_results = {:conditions => "0 = 1"}
+        return no_results unless words != nil
         words = words.strip.to_s.split(/[\s\-]+/) unless words.instance_of? Array
-        return {} unless words.size > 0
+        return no_results unless words.size > 0
 
         trigrams = []
         words.each do |w|
