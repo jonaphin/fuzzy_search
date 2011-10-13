@@ -67,7 +67,7 @@ module FuzzySearch
 
     module WordNormalizerClassMethod
       def normalize(word)
-        word.downcase
+        word.mb_chars.normalize(:kd).gsub(/[^\x00-\x7F]/n,'').downcase.to_s
       end
     end
 
