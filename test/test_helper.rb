@@ -19,6 +19,7 @@ end
 require 'rubygems'
 require 'minitest/autorun'
 require 'redgreen'
+require 'pp'
 
 # Set default string encoding to unicode
 $KCODE = 'u'
