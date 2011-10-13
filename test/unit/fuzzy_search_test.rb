@@ -15,6 +15,12 @@ describe "fuzzy_search" do
     create(:email, :address => "billg@microsoft.com")
   end
 
+  after do
+    Person.delete_all
+    Email.delete_all
+    FuzzySearchTrigram.delete_all
+  end
+
   it "can search an indexed ActiveRecord model for similar strings" do
     assert_equal 3, Person.fuzzy_search("meyr").size
     assert_equal 1, Person.fuzzy_search("myr").size
