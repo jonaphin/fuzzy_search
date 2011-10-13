@@ -27,9 +27,13 @@ describe "fuzzy_search" do
     result = Person.fuzzy_search("kristian meier")
     assert_equal "kristian", result[0].first_name
     assert_equal "meier", result[0].last_name
-    assert_equal 100, result[0].fuzzy_weight
+  end
+
+  it "sorts results by their fuzzy match score" do
+    result = Person.fuzzy_search("kristian meier")
+    assert_equal 100, result[0].fuzzy_score
     (1..3).each do |idx|
-      assert result[idx].fuzzy_weight < 100
+      assert result[idx].fuzzy_score < 100
     end
   end
 
