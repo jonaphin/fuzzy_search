@@ -56,7 +56,7 @@ describe "fuzzy_search" do
   it "deletes search index entries when a record is deleted" do
     size = Person.fuzzy_search("other").size
     assert size > 0, "some entries"
-    Person.delete_all(:last_name => "other")
+    Person.destroy_all(:last_name => "öther")
     assert_equal size, Person.fuzzy_search("other").size + 1
   end
 
