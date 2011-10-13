@@ -17,7 +17,7 @@ To allow a model to be searched, specify which columns are to be indexed:
 ```ruby
 class Person < ActiveRecord::Base
     # ...
-    fuzzy_searchable_on :name, :surname
+    fuzzy_searchable_on :first_name, :last_name
     # ...
 end
 ```

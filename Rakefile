@@ -1,8 +1,8 @@
 require 'rubygems'
 require 'rake'
 require 'rake/testtask'
-require 'rake/rdoctask'
-require 'rake/gempackagetask'
+require 'rdoc/task'
+require 'rubygems/package_task'
 
 def common_test_settings(t)
   t.libs << 'lib'
@@ -17,6 +17,11 @@ task :default => :test
 desc 'Test fuzzy_search.'
 Rake::TestTask.new(:test) do |t|
   common_test_settings(t)
+end
+
+desc 'Run tests automatically as files change'
+task :watchr do |t|
+  exec 'watchr test/test.watchr'
 end
 
 desc 'Generate documentation for fuzzy_search.'
@@ -52,10 +57,10 @@ rescue LoadError
   # Ruby-prof wasn't available
 end
 
-require 'lib/version'
+require 'lib/fuzzy_search_ver'
 gemspec = Gem::Specification.new do |s|
   s.name         = "fuzzy_search"
-  s.version      = Offroad::VERSION
+  s.version      = FuzzySearch::VERSION
   s.authors      = ["Kristian Meier", "David Mike Simon"]
   s.email        = "david.mike.simon@gmail.com"
   s.homepage     = "http://github.com/DavidMikeSimon/fuzzy_search"
@@ -68,5 +73,5 @@ gemspec = Gem::Specification.new do |s|
   s.rubyforge_project = '[none]'
 end
 
-Rake::GemPackageTask.new(gemspec) do |pkg|
+Gem::PackageTask.new(gemspec) do |pkg|
 end
