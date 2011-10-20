@@ -56,12 +56,14 @@ module FuzzySearch
         # "table_name"."id", "table_name"."field1", "table_name"."field2", ...
         entity_fields = columns.map{|col| "#{qi(table_name)}.#{qi(col.name)}"}.join(",")
 
-        # The SQL expression for calculating fuzzy_score
-        # Has to be used multiple times because some databases (i.e. Postgres) do not support HAVING on named SELECT fields
+        # The SQL expression for calculating fuzzy_score.
+        # Has to be used multiple times because some databases (i.e. Postgres)
+        # do not support HAVING on named SELECT fields.
         fuzzy_score_expr = "((count(*)*100.0)/#{trigrams.size})"
 
-        # TODO: Optimize this query. In a large trigram table, this is going to go through a lot of dead ends.
-        # Maybe I need to just bite the bullet and learn how to do procedures? That would break cross-database compatibility, though...
+        # TODO: Optimize this query.
+        # Perhaps better to search primarily on the trigram table alone, then just
+        # return a simple scope that lists ids.
         return {
           :select => "#{fuzzy_score_expr} AS fuzzy_score, #{entity_fields}",
           :joins => "LEFT OUTER JOIN fuzzy_search_trigrams ON fuzzy_search_trigrams.rec_id = #{qi(table_name)}.#{qi(primary_key)}",
