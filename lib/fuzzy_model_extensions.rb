@@ -66,7 +66,7 @@ module FuzzySearch
         # return a simple scope that lists ids.
         return {
           :select => "#{fuzzy_score_expr} AS fuzzy_score, #{entity_fields}",
-          :joins => "LEFT OUTER JOIN fuzzy_search_trigrams ON fuzzy_search_trigrams.rec_id = #{qi(table_name)}.#{qi(primary_key)}",
+          :joins => "INNER JOIN fuzzy_search_trigrams ON fuzzy_search_trigrams.rec_id = #{qi(table_name)}.#{qi(primary_key)}",
           :conditions => ["fuzzy_search_trigrams.token IN (?) AND rec_type = ?",
             trigrams, name],
           :group => "#{qi(table_name)}.#{qi(primary_key)}",
