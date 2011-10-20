@@ -70,8 +70,8 @@ module FuzzySearch
         FuzzySearchTrigram.delete_all(:rec_id => self.id, :rec_type => self.class.name)
 
         props = self.class.fuzzy_search_properties.map{|p| send(p)}
-        words = props.select{|p| p and p.respond_to?(:to_s)}
-        trigrams = FuzzySearch::split_trigrams(words)
+        props = props.select{|p| p and p.respond_to?(:to_s)}
+        trigrams = FuzzySearch::split_trigrams(props)
 
         FuzzySearchTrigram.import(
           [:token, :rec_id, :rec_type],
