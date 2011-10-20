@@ -38,7 +38,7 @@ The fuzzy_search method returns arrays:
 people = Person.fuzzy_search "OReilly"
 ```
 
-Fuzzy find works on scopes too, including named_scopes and on-the-fly scopes:
+It works thru scopes too, including named_scopes and on-the-fly scopes:
 
 ```ruby
 people = Person.scoped({:conditions => ["state='active'"]}).fuzzy_search("OReilly")
