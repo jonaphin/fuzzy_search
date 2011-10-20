@@ -80,10 +80,6 @@ describe "fuzzy_search" do
     refute_empty Email.fuzzy_search("oscar")
   end
 
-  it "can normalize strings" do
-    assert_equal("aaaaaa", Person.normalize("ÀÁÂÃÄÅ"))
-  end
-
   it "normalizes strings before searching on them" do
     assert_equal 1, Person.fuzzy_search("Müll").size
     assert_equal 1, Email.fuzzy_search("öscar").size

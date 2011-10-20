@@ -1,3 +1,5 @@
+require 'set'
+
 module FuzzySearch
   module ModelExtensions
     def self.included(base)
@@ -17,7 +19,6 @@ module FuzzySearch
         has_many :fuzzy_search_trigrams, :as => :rec, :dependent => :destroy
         after_save :update_fuzzy_search_trigrams!
         named_scope :fuzzy_search_scope, lambda { |words| generate_fuzzy_search_scope_params(words) }
-        extend WordNormalizerClassMethod unless respond_to? :normalize
         include InstanceMethods
       end
 
@@ -36,23 +37,14 @@ module FuzzySearch
       private
 
       def generate_fuzzy_search_scope_params(words)
-        no_results = {:conditions => "0 = 1"}
-        return no_results unless words != nil
-        words = words.strip.to_s.split(/[\s\-]+/) unless words.instance_of? Array
-        return no_results unless words.size > 0
-
-        trigrams = []
-        words.each do |w|
-          word = ' ' + normalize(w) + ' '
-          word_as_chars = word.mb_chars
-          trigrams << (0..word_as_chars.length-3).collect {|idx| word_as_chars[idx,3].to_s}
-        end
-        trigrams = trigrams.flatten.uniq
+        trigrams = FuzzySearch::split_trigrams(words)
+        # No results for empty search string
+        return {:conditions => "0 = 1"} unless trigrams
 
         # Transform the list of columns in the searchable entity into 
         # a SQL fragment like:
         # "table_name.id, table_name.field1, table_name.field2, ..."
-        entity_fields = columns.map {|col| table_name + "." + col.name}.join(", ")
+        entity_fields = columns.map{|col| table_name + "." + col.name}.join(", ")
 
         # The SQL expression for calculating fuzzy_score
         # Has to be used multiple times because some databases (i.e. Postgres) do not support HAVING on named SELECT fields
@@ -73,37 +65,17 @@ module FuzzySearch
       end
     end
 
-    module WordNormalizerClassMethod
-      def normalize(word)
-        word.mb_chars.normalize(:kd).gsub(/[^\x00-\x7F]/n,'').downcase.to_s
-      end
-    end
-
     module InstanceMethods
       def update_fuzzy_search_trigrams!
         FuzzySearchTrigram.delete_all(:rec_id => self.id, :rec_type => self.class.name)
 
-        # to avoid double entries
-        tokens = []
-        self.class.fuzzy_search_properties.each do |prop|
-          prop_value = send(prop)
-          next if prop_value.nil?
-          # split the property into words (which are separated by whitespaces)
-          # and generate the trigrams for each word
-          prop_value.to_s.split(/[\s\-]+/).each do |p|
-            # put a space in front and at the end to emphasize the endings
-            word = ' ' + self.class.normalize(p) + ' '
-            word_as_chars = word.mb_chars
-            (0..word_as_chars.length - 3).each do |idx|
-              token = word_as_chars[idx, 3].to_s
-              tokens << token unless tokens.member?(token)
-            end
-          end
-        end
+        props = self.class.fuzzy_search_properties.map{|p| send(p)}
+        words = props.select{|p| p and p.respond_to?(:to_s)}
+        trigrams = FuzzySearch::split_trigrams(words)
 
         FuzzySearchTrigram.import(
           [:token, :rec_id, :rec_type],
-          tokens.map{|t| [t, self.id, self.class.name]},
+          trigrams.map{|t| [t, self.id, self.class.name]},
           :validate => false
         )
       end

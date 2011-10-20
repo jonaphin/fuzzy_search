@@ -13,5 +13,6 @@ end
 require 'fuzzy_model_extensions'
 require 'fuzzy_search_trigram'
 require 'fuzzy_search_ver'
+require 'split_trigrams'
 
 ActiveRecord::Base.send(:include, FuzzySearch::ModelExtensions)
