@@ -36,6 +36,16 @@ module FuzzySearch
 
       private
 
+      # Quote SQL identifier (i.e. table or column name)
+      def qi(s)
+        connection.quote_column_name(s)
+      end
+
+      # Quote SQL value (i.e. a string or number)
+      def qv(s)
+        connection.quote(s)
+      end
+
       def generate_fuzzy_search_scope_params(words)
         trigrams = FuzzySearch::split_trigrams(words)
         # No results for empty search string
@@ -43,24 +53,23 @@ module FuzzySearch
 
         # Transform the list of columns in the searchable entity into 
         # a SQL fragment like:
-        # "table_name.id, table_name.field1, table_name.field2, ..."
-        entity_fields = columns.map{|col| table_name + "." + col.name}.join(", ")
+        # "table_name"."id", "table_name"."field1", "table_name"."field2", ...
+        entity_fields = columns.map{|col| "#{qi(table_name)}.#{qi(col.name)}"}.join(",")
 
         # The SQL expression for calculating fuzzy_score
         # Has to be used multiple times because some databases (i.e. Postgres) do not support HAVING on named SELECT fields
-        # TODO: See if we can't get the count(*) out of here, that's a non-trivial operation in some databases
-        fuzzy_score_expr = "(((count(*)*100.0)/#{trigrams.size}) + " +
-          "((count(*)*100.0)/(SELECT count(*) FROM fuzzy_search_trigrams WHERE rec_id = #{table_name}.#{primary_key} AND rec_type = '#{name}')))/2.0"
+        fuzzy_score_expr = "((count(*)*100.0)/#{trigrams.size})"
 
         # TODO: Optimize this query. In a large trigram table, this is going to go through a lot of dead ends.
         # Maybe I need to just bite the bullet and learn how to do procedures? That would break cross-database compatibility, though...
         return {
           :select => "#{fuzzy_score_expr} AS fuzzy_score, #{entity_fields}",
-          :joins => ["LEFT OUTER JOIN fuzzy_search_trigrams ON fuzzy_search_trigrams.rec_id = #{table_name}.#{primary_key}"],
-          :conditions => ["fuzzy_search_trigrams.token IN (?) AND rec_type = '#{name}'", trigrams],
-          :group => "#{table_name}.#{primary_key}",
+          :joins => "LEFT OUTER JOIN fuzzy_search_trigrams ON fuzzy_search_trigrams.rec_id = #{qi(table_name)}.#{qi(primary_key)}",
+          :conditions => ["fuzzy_search_trigrams.token IN (?) AND rec_type = ?",
+            trigrams, name],
+          :group => "#{qi(table_name)}.#{qi(primary_key)}",
           :order => "fuzzy_score DESC",
-          :having => "#{fuzzy_score_expr} >= #{fuzzy_search_threshold}"
+          :having => "#{fuzzy_score_expr} >= #{qv(fuzzy_search_threshold)}"
         }
       end
     end
