@@ -18,6 +18,7 @@ end
 
 require 'rubygems'
 require 'minitest/autorun'
+require 'minitest/benchmark' if ENV["BENCH"]
 require 'redgreen'
 require 'pp'
 
@@ -61,6 +62,7 @@ module MiniTest
 end
 
 require 'factories'
+require 'faker'
 MiniTest::Unit::TestCase.send(:include, Factory::Syntax::Methods)
 
 MiniTest::Unit::TestCase.add_setup_hook do
