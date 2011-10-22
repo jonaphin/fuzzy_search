@@ -27,11 +27,13 @@ module FuzzySearch
 
         write_inheritable_attribute :fuzzy_search_properties, properties
 
+        extend FuzzySearchClassMethods
         include InstanceMethods
       end
+    end
 
+    module FuzzySearchClassMethods
       def fuzzy_search(words)
-        # TODO: If fuzzy_search_scope doesn't exist, provide a useful error
         fuzzy_search_scope(words).all
       end
 
