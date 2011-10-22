@@ -5,14 +5,14 @@ module FuzzySearch
     def self.included(base)
       base.extend ClassMethods
 
-      base.write_inheritable_attribute :fuzzy_search_properties, []
-      base.class_inheritable_reader :fuzzy_search_properties
-
-      base.write_inheritable_attribute :fuzzy_search_threshold, 5
-      base.class_inheritable_reader :fuzzy_search_threshold
-
-      base.write_inheritable_attribute :fuzzy_search_type_id, nil
-      base.class_inheritable_reader :fuzzy_search_type_id
+      {
+        :fuzzy_search_properties => [],
+        :fuzzy_search_threshold => 5,
+        :fuzzy_search_type_id => nil
+      }.each do |key, value|
+        base.write_inheritable_attribute key, value
+        base.class_inheritable_reader key
+      end
     end
 
     module ClassMethods
