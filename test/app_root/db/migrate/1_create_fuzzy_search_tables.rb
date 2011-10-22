@@ -1,0 +1,1 @@
+../../../../rails_generators/fuzzy_search_setup/templates/create_fuzzy_search_tables.rb

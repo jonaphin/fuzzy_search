@@ -12,6 +12,7 @@ end
 
 require 'fuzzy_model_extensions'
 require 'fuzzy_search_trigram'
+require 'fuzzy_search_type'
 require 'fuzzy_search_ver'
 require 'split_trigrams'
 

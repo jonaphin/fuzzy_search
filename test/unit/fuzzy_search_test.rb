@@ -96,6 +96,8 @@ describe "fuzzy_search" do
   end
 
   it "can rebuild the search index from scratch" do
+    # FIXME: Have this test make sure that rebuild_fuzzy_search_index! is
+    # deleting only the correct old trigrams before regenerating.
     FuzzySearchTrigram.delete_all
     assert_empty Person.fuzzy_search("chris")
     Person.rebuild_fuzzy_search_index!
