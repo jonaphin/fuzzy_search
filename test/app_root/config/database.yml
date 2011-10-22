@@ -4,3 +4,8 @@ test:
   verbosity: quiet
   pool: 5
   timeout: 5000
+
+#test:
+#  adapter: mysql
+#  database: "fuzzy"
+#  username: root

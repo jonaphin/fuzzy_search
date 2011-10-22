@@ -34,11 +34,12 @@ describe "fuzzy_search" do
 
   it "sorts results by their fuzzy match score" do
     result = Person.fuzzy_search("kristian meier")
-    prior = result[0].fuzzy_score
-    assert_equal 100, prior
+    prior = result[0].fuzzy_score.to_f
+    assert_equal 100.0, prior
     (1..3).each do |idx|
-      assert result[idx].fuzzy_score < prior
-      prior = result[idx].fuzzy_score
+      n = result[idx].fuzzy_score.to_f
+      assert n < prior
+      prior = n
     end
   end
 
