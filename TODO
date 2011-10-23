@@ -1,4 +1,4 @@
-* Consider setting concurrent_insert to 2 on MySQL to make sure we don't
+* MyISAM: Consider setting concurrent_insert to 2 on MySQL to make sure we don't
 have nasty locking scenarios when there are holes in the middle
 of the trigrams table. See:
 
@@ -9,15 +9,35 @@ for ages like OPTIMIZE, perhaps can just rebuild trigrams for the most-recently
 inserted trigram rows until fragmentation no longer in place? In concurrent_insert
 mode 1, this should cause it to reallocate those trigram rows backwards into the hole.
 
-* Alternate strategy: stick rec_id in the index too, so that selects never
-have to leave the index at all. This would also maybe allow us to switch
-back to InnoDB again for greater concurrency. Benchmark, benchmark, benchmark!
-
 * Probably should go back to using a separate trigrams table for each
 searchable type. That would reduce the record size by a fair bit, and
 simplify any later ideas along the lines of pre-scoped searches (i.e.
-keeping school id in the trigrams table for student names).
+keeping student_school id in the trigrams table for student names).
 
-Then again, that particular example kind of sucks, because a student's
-primary school might well want to search for their name even after they're
-in junior high. Possibly pre-scoped searches are not a good idea.
+* Maybe just find the matching trigram with the fewest associated
+records, then do the search within the target table from there?
+Like the second half of this answer:
+http://stackoverflow.com/questions/3320698/what-is-the-best-way-to-implement-a-substring-search-in-sql/3320810#3320810
+This has the disadvantage that if a user makes a typo
+and the typo'd trigram is the winner, then they won't
+see their desired record in the results, and who knows
+if they'll then try to correct their search string or not.
+
+* People are mostly going to be typing
+in prefixes (or near prefixes) of words, maybe
+I only need to make trigrams for the first 6-8 characters
+of each word?
+
+* Or better yet, can use something like the old Badger approach: compare user
+input with Badger-variations of the first N (maybe 4-6 or so) characters of
+each indexed word. Tho, this means that up until they type N characters, they
+won't be able to get matches on anything that isn't actually a word less than
+N characters long.
+
+* Need to use a proper primary key if i'm using an
+InnoDB table, otherwise I'm just being pointlessly wasteful.
+See http://www.xaprb.com/blog/2006/07/04/how-to-exploit-mysql-index-optimizations/
+
+* Can I detect what columns they're actually interested in selecting
+from the active scope? As it is I'm forcing a select of all columns
+from the target table.
