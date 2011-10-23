@@ -35,12 +35,12 @@ class FuzzySearchTrigram < ActiveRecord::Base
 
     return {
       :select => "#{fuzzy_score_expr} AS fuzzy_score, #{entity_fields}",
-      :joins => "INNER JOIN fuzzy_search_trigrams ON
-                 fuzzy_search_trigrams.rec_id =
+      :joins => "INNER JOIN #{q.i(table_name)} ON
+                 #{q.i(table_name)}.rec_id =
                  #{q.i(type.table_name)}.#{q.i(type.primary_key)}",
       :conditions => [
-        "fuzzy_search_trigrams.token IN (?)
-        AND fuzzy_search_type_id = ?",
+        "#{q.i(table_name)}.token IN (?)
+        AND #{q.i(table_name)}.fuzzy_search_type_id = ?",
         trigrams,
         type.send(:fuzzy_type_id)],
       :group => "#{q.i(type.table_name)}.#{q.i(type.primary_key)}",

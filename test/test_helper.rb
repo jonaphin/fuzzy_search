@@ -69,3 +69,14 @@ MiniTest::Unit::TestCase.add_setup_hook do
   ActiveRecord::Migration.verbose = false
   ActiveRecord::Migrator.migrate("#{Rails.root}/db/migrate") # Migrations in the test app
 end
+
+# From http://stackoverflow.com/questions/1090801/1091106
+ActiveRecord::ConnectionAdapters::AbstractAdapter.class_eval do
+  attr_reader :last_query
+
+  def log_with_last_query(sql, name, &block)
+    @last_query = [sql, name]
+    log_without_last_query(sql, name, &block)
+  end
+  alias_method_chain :log, :last_query
+end
