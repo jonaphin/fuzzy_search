@@ -12,3 +12,12 @@ mode 1, this should cause it to reallocate those trigram rows backwards into the
 * Alternate strategy: stick rec_id in the index too, so that selects never
 have to leave the index at all. This would also maybe allow us to switch
 back to InnoDB again for greater concurrency. Benchmark, benchmark, benchmark!
+
+* Probably should go back to using a separate trigrams table for each
+searchable type. That would reduce the record size by a fair bit, and
+simplify any later ideas along the lines of pre-scoped searches (i.e.
+keeping school id in the trigrams table for student names).
+
+Then again, that particular example kind of sucks, because a student's
+primary school might well want to search for their name even after they're
+in junior high. Possibly pre-scoped searches are not a good idea.
