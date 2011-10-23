@@ -32,6 +32,10 @@ class FuzzySearchTrigram < ActiveRecord::Base
     # the number of trigrams in the query that matched the record, and
     # the number of trigrams in the record that matched the query!
     fuzzy_score_expr = "((count(*)*100.0)/#{trigrams.size})"
+#    fuzzy_score_expr = "(((count(*)*100.0)/#{trigrams.size}) + " +
+#    "((count(*)*100.0)/(SELECT count(*) FROM fuzzy_search_trigrams WHERE " +
+#    "rec_id = #{q.i(type.table_name)}.#{q.i(type.primary_key)} AND " +
+#    "fuzzy_search_type_id = #{q.v(type.send(:fuzzy_type_id))})))/2.0"
 
     return {
       :select => "#{fuzzy_score_expr} AS fuzzy_score, #{entity_fields}",
