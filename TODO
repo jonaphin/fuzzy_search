@@ -8,3 +8,6 @@ Or, as an alternate way of doing defragmentation that doesn't block the server
 for ages like OPTIMIZE, perhaps can just rebuild trigrams for the most-recently
 inserted trigram rows until fragmentation no longer in place? In concurrent_insert
 mode 1, this should cause it to reallocate those trigram rows backwards into the hole.
+
+* Alternate strategy: stick rec_id in the index too, so that selects never
+have to leave the index at all.
