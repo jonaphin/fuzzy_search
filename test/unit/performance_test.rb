@@ -6,6 +6,9 @@ describe "fuzzy_search" do
       Person.set_table_name "preloaded_people"
       FuzzySearchTrigram.set_table_name "preloaded_trigrams"
       FuzzySearchType.set_table_name "preloaded_types"
+
+      # Force Person to reload its fuzzy type id from preloaded_types
+      Person.send(:write_inheritable_attribute, :fuzzy_search_type_id, nil)
     end
 
     after do
@@ -23,7 +26,7 @@ describe "fuzzy_search" do
       end
       if n == 1
         puts
-        puts FuzzySearchTrigram.connection.last_query.to_s.gsub(/\s+/, ' ')
+        puts FuzzySearchTrigram.connection.last_query.first.gsub(/\s+/, ' ')
         puts
       elsif n > 100
         if c/(n.to_f) < 2
