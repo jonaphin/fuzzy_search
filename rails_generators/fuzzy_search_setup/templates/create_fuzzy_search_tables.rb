@@ -6,6 +6,7 @@ class CreateFuzzySearchTables < ActiveRecord::Migration
       t.column :rec_id, :integer
     end
 
+    add_index :fuzzy_search_trigrams, [:fuzzy_search_type_id, :token]
 
     create_table :fuzzy_search_types do |t|
       t.column :type_name, :string
