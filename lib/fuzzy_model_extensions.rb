@@ -47,7 +47,7 @@ module FuzzySearch
       def fuzzy_type_id
         r = fuzzy_search_type_id
         unless r
-          r = FuzzySearchType.find_or_create_by_type_name(name)
+          r = FuzzySearchType.find_or_create_by_type_name(name).id
           write_inheritable_attribute :fuzzy_search_type_id, r
         end
         r
