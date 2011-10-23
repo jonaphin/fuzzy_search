@@ -1,7 +1,7 @@
 class CreateFuzzySearchTables < ActiveRecord::Migration
   def self.up
     create_table :fuzzy_search_trigrams, :id => false do |t|
-      t.column :token, :string, :limit => 3
+      t.column :token, :binary, :limit => 3
       t.column :fuzzy_search_type_id, :integer
       t.column :rec_id, :integer
     end
