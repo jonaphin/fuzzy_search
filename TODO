@@ -3,3 +3,8 @@ have nasty locking scenarios when there are holes in the middle
 of the trigrams table. See:
 
 http://dev.mysql.com/doc/refman/5.0/en/server-system-variables.html#sysvar_concurrent_insert
+
+Or, as an alternate way of doing defragmentation that doesn't block the server
+for ages like OPTIMIZE, perhaps can just rebuild trigrams for the most-recently
+inserted trigram rows until fragmentation no longer in place? In concurrent_insert
+mode 1, this should cause it to reallocate those trigram rows backwards into the hole.
