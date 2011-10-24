@@ -7,7 +7,7 @@ module FuzzySearch
 
       {
         :fuzzy_search_properties => [],
-        :fuzzy_search_threshold => 5,
+        :fuzzy_search_threshold => 15,
         :fuzzy_search_type_id => nil
       }.each do |key, value|
         base.write_inheritable_attribute key, value
