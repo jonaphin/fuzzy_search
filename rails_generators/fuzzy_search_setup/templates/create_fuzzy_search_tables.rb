@@ -6,7 +6,14 @@ class CreateFuzzySearchTables < ActiveRecord::Migration
       t.column :rec_id, :integer, :null => false
     end
 
-    add_index :fuzzy_search_trigrams, [:fuzzy_search_type_id, :token]
+    if ActiveRecord::Base.connection.adapter_name.downcase == 'mysql'
+      ActiveRecord::Base.connection.execute(
+        "alter table fuzzy_search_trigrams add primary key (fuzzy_search_type_id,token,rec_id)"
+      )
+    else
+      add_index :fuzzy_search_trigrams, [:fuzzy_search_type_id, :token, :rec_id], :unique => true
+    end
+    add_index :fuzzy_search_trigrams, [:rec_id]
 
     create_table :fuzzy_search_types do |t|
       t.column :type_name, :string, :null => false
