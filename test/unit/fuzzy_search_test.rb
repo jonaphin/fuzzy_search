@@ -2,7 +2,7 @@ require File.expand_path(File.dirname(__FILE__) + '/../test_helper')
 
 describe "fuzzy_search" do
   before do 
-    create(:person, :last_name => "meier", :first_name => "kristian")
+    @kris = create(:person, :last_name => "meier", :first_name => "kristian")
     create(:person, :last_name => "meyer", :first_name => "christian", :hobby => "Bicycling")
     create(:person, :last_name => "mayr", :first_name => "Chris")
     create(:person, :last_name => "maier", :first_name => "christoph", :hobby => "Bicycling")
@@ -32,15 +32,10 @@ describe "fuzzy_search" do
     assert_equal "meier", result[0].last_name
   end
 
-  it "sorts results by their fuzzy match score" do
+  it "sorts results with the best match first" do
     result = Person.fuzzy_search("kristian meier")
-    prior = result[0].fuzzy_score.to_f
-    assert_equal 100.0, prior
-    (1..result.size-1).each do |idx|
-      n = result[idx].fuzzy_score.to_f
-      assert n < prior
-      prior = n
-    end
+    assert_equal @kris, result.first
+    assert result.size > 1
   end
 
   it "returns an empty result set when given an empty query string" do

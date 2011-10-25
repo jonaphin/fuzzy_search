@@ -13,19 +13,10 @@ class FuzzySearchTrigram < ActiveRecord::Base
     # No results for empty search string
     return {:conditions => "0 = 1"} unless trigrams
 
-    q = Quoter.new(type)
-
-    # Transform the list of columns in the searched type into
-    # a SQL fragment like:
-    # "table_name"."id", "table_name"."field1", "table_name"."field2", ...
-    entity_fields = type.columns.map{|col|
-      q.i(type.table_name) + "." + q.i(col.name)
-    }.join(",")
-
     # The SQL expression for calculating fuzzy_score.
     # Has to be used multiple times because some databases (i.e. Postgres)
     # do not support HAVING on named SELECT fields.
-    # TODO: Restore old average thing from the original code; the point
+    # Possible TODO: Restore old average thing from the original code; the point
     # of that was to prefer short matches when given short query strings.
     # (i.e. "ama" should rank "Amad" higher than "Amalamadingdongwitcherydoo")
     # The average was between:
@@ -37,19 +28,24 @@ class FuzzySearchTrigram < ActiveRecord::Base
 #    "rec_id = #{q.i(type.table_name)}.#{q.i(type.primary_key)} AND " +
 #    "fuzzy_search_type_id = #{q.v(type.send(:fuzzy_type_id))})))/2.0"
 
+    search_result = connection.select_rows(
+      "SELECT rec_id, count(*) FROM #{i(table_name)} " +
+      "WHERE token IN (#{trigrams.map{|t| v(t)}.join(',')}) " +
+      "AND fuzzy_search_type_id = #{v(type.send(:fuzzy_type_id))} " +
+      "GROUP by rec_id " +
+      "ORDER BY count(*) DESC " +
+      "LIMIT #{v(type.send(:fuzzy_search_limit))}"
+    )
+    return {:conditions => "0 = 1"} if search_result.empty?
+
+    static_sql_union = search_result.map{|rec_id, count|
+      "SELECT #{v(rec_id)} AS fuzzy_search_rec_id, #{v(count)} AS fuzzy_search_score"
+    }.join(" UNION ");
+
     return {
-      :select => "#{fuzzy_score_expr} AS fuzzy_score, #{entity_fields}",
-      :joins => "INNER JOIN #{q.i(table_name)} ON
-                 #{q.i(table_name)}.rec_id =
-                 #{q.i(type.table_name)}.#{q.i(type.primary_key)}",
-      :conditions => [
-        "#{q.i(table_name)}.token IN (?)
-        AND #{q.i(table_name)}.fuzzy_search_type_id = ?",
-        trigrams,
-        type.send(:fuzzy_type_id)],
-      :group => "#{q.i(type.table_name)}.#{q.i(type.primary_key)}",
-      :order => "fuzzy_score DESC",
-      :having => "#{fuzzy_score_expr} >= #{q.v(type.fuzzy_search_threshold)}"
+      :joins => "INNER JOIN (#{static_sql_union}) ON " +
+                "fuzzy_search_rec_id = #{i(type.table_name)}.#{i(type.primary_key)}",
+      :order => "fuzzy_search_score DESC"
     }
   end
 
@@ -78,19 +74,13 @@ class FuzzySearchTrigram < ActiveRecord::Base
 
   private
 
-  class Quoter
-    def initialize(type)
-      @type = type
-    end
+  # Quote SQL identifier (i.e. table or column name)
+  def self.i(s)
+    connection.quote_column_name(s)
+  end
 
-    # Quote SQL identifier (i.e. table or column name)
-    def i(s)
-      @type.connection.quote_column_name(s)
-    end
-
-    # Quote SQL value (i.e. a string or number)
-    def v(s)
-      @type.connection.quote(s)
-    end
+  # Quote SQL value (i.e. a string or number)
+  def self.v(s)
+    connection.quote(s)
   end
 end

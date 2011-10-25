@@ -7,8 +7,8 @@ module FuzzySearch
 
       {
         :fuzzy_search_properties => [],
-        :fuzzy_search_threshold => 15,
-        :fuzzy_search_type_id => nil
+        :fuzzy_search_limit => 25,
+        :fuzzy_search_cached_type_id => nil
       }.each do |key, value|
         base.write_inheritable_attribute key, value
         base.class_inheritable_reader key
@@ -45,10 +45,10 @@ module FuzzySearch
 
       # Retrieve cached fuzzy type id, creating it if necessary
       def fuzzy_type_id
-        r = fuzzy_search_type_id
+        r = fuzzy_search_cached_type_id
         unless r
           r = FuzzySearchType.find_or_create_by_type_name(name).id
-          write_inheritable_attribute :fuzzy_search_type_id, r
+          write_inheritable_attribute :fuzzy_search_cached_type_id, r
         end
         r
       end
