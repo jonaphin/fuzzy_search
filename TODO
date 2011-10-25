@@ -34,10 +34,6 @@ each indexed word. Tho, this means that up until they type N characters, they
 won't be able to get matches on anything that isn't actually a word less than
 N characters long.
 
-* Need to use a proper primary key if i'm using an
-InnoDB table, otherwise I'm just being pointlessly wasteful.
-See http://www.xaprb.com/blog/2006/07/04/how-to-exploit-mysql-index-optimizations/
-
 * Can I detect what columns they're actually interested in selecting
 from the active scope? As it is I'm forcing a select of all columns
 from the target table.
@@ -47,3 +43,5 @@ short query strings, i.e. "ama" should rank "Amad" higher than
 "Amalamadingdongwitcherydoo".  Can do this by using the total
 number of trigrams for the given record (or maybe a given word?)
 as a secondary order field.
+
+* Phonetic coding (i.e metaphone)
