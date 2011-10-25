@@ -16,6 +16,9 @@ class FuzzySearchTrigram < ActiveRecord::Base
     # Retrieve the IDs of the matching items
     search_result = connection.select_rows(
       "SELECT rec_id, count(*) FROM #{i(table_name)} " +
+      (connection.adapter_name.downcase == 'mysql' ?
+        "USE INDEX (PRIMARY) " : ""
+      ) +
       "WHERE token IN (#{trigrams.map{|t| v(t)}.join(',')}) " +
       "AND fuzzy_search_type_id = #{type.send(:fuzzy_type_id)} " +
       "GROUP by rec_id " +
