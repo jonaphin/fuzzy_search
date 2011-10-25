@@ -23,20 +23,11 @@ and the typo'd trigram is the winner, then they won't
 see their desired record in the results, and who knows
 if they'll then try to correct their search string or not.
 
-* People are mostly going to be typing
-in prefixes (or near prefixes) of words, maybe
-I only need to make trigrams for the first 6-8 characters
-of each word?
-
 * Or better yet, can use something like the old Badger approach: compare user
 input with Badger-variations of the first N (maybe 4-6 or so) characters of
 each indexed word. Tho, this means that up until they type N characters, they
 won't be able to get matches on anything that isn't actually a word less than
 N characters long.
-
-* Can I detect what columns they're actually interested in selecting
-from the active scope? As it is I'm forcing a select of all columns
-from the target table.
 
 * If it doesn't slow things up too much, prefer short matches when given
 short query strings, i.e. "ama" should rank "Amad" higher than
