@@ -43,7 +43,7 @@ module FuzzySearch
       search_result = connection.select_rows(
         "SELECT rec_id, count(*) FROM #{i(table_name)} " +
         (connection.adapter_name.downcase == 'mysql' ?
-          "USE INDEX (PRIMARY) " : ""
+          "IGNORE INDEX (index_#{table_name}_on_rec_id) " : ""
         ) +
         "WHERE token IN (#{trigrams.map{|t| v(t)}.join(',')}) " +
         (subset ? "AND subset = #{subset} " : "") +
