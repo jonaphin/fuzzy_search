@@ -50,6 +50,13 @@ describe "fuzzy_search" do
     refute_empty Person.fuzzy_search("David")
   end
 
+  it "only updates the appropriate trigram table" do
+    original_state = Email::FuzzySearchTrigram.all.to_a
+    create(:person, :first_name => "David", :last_name => "Simon")
+    new_state = Email::FuzzySearchTrigram.all.to_a
+    assert_equal original_state, new_state
+  end
+
   it "updates the search index automatically when a record is updated" do
     assert_empty Person.fuzzy_search("Obama")
     refute_empty Person.fuzzy_search("yet")
