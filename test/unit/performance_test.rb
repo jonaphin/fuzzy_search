@@ -8,7 +8,7 @@ describe "fuzzy_search" do
       FuzzySearchType.set_table_name "preloaded_types"
 
       # Force Person to reload its fuzzy type id from preloaded_types
-      Person.send(:write_inheritable_attribute, :fuzzy_search_type_id, nil)
+      Person.send(:write_inheritable_attribute, :fuzzy_search_cached_type_id, nil)
     end
 
     after do
@@ -29,8 +29,9 @@ describe "fuzzy_search" do
         puts FuzzySearchTrigram.connection.last_query.first.gsub(/\s+/, ' ')
         puts
       elsif n > 100
-        if c/(n.to_f) < 2
-          raise "Sanity check failure, average results per query: #{c/(n.to_f)}"
+        rpq = c/(n.to_f)
+        if rpq < 2
+          raise "Sanity check failure, average results per query: #{rpq}"
         end
       end
     end
