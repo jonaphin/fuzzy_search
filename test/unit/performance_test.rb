@@ -27,11 +27,7 @@ describe "fuzzy_search" do
         result = Person.scoped(:limit => 20).fuzzy_search(Faker::Name.last_name)
         c += result.size
       end
-      if n == 1
-        puts
-        puts FuzzySearchTrigram.connection.last_query.first.gsub(/\s+/, ' ')
-        puts
-      elsif n >= 30
+      if n >= 30
         rpq = c/(n.to_f)
         if rpq < 2
           raise "Sanity check failure, average results per query: #{rpq}"
