@@ -17,16 +17,16 @@ class FuzzySearchTrigram < ActiveRecord::Base
     search_result = connection.select_rows(
       "SELECT rec_id, count(*) FROM #{i(table_name)} " +
       "WHERE token IN (#{trigrams.map{|t| v(t)}.join(',')}) " +
-      "AND fuzzy_search_type_id = #{v(type.send(:fuzzy_type_id))} " +
+      "AND fuzzy_search_type_id = #{type.send(:fuzzy_type_id)} " +
       "GROUP by rec_id " +
       "ORDER BY count(*) DESC " +
-      "LIMIT #{v(type.send(:fuzzy_search_limit))}"
+      "LIMIT #{type.send(:fuzzy_search_limit)}"
     )
     return {:conditions => "0 = 1"} if search_result.empty?
 
     # Perform a join between the target table and a fake table of matching ids
     static_sql_union = search_result.map{|rec_id, count|
-      "SELECT #{v(rec_id)} AS id, #{v(count)} AS score"
+      "SELECT #{v(rec_id)} AS id, #{count} AS score"
     }.join(" UNION ");
     return {
       :joins => "INNER JOIN (#{static_sql_union}) AS fuzzy_search_results ON " +
