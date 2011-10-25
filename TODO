@@ -42,9 +42,8 @@ See http://www.xaprb.com/blog/2006/07/04/how-to-exploit-mysql-index-optimization
 from the active scope? As it is I'm forcing a select of all columns
 from the target table.
 
-* Possible TODO: Restore old average thing from the original code; the point
-of that was to prefer short matches when given short query strings.
-(i.e. "ama" should rank "Amad" higher than "Amalamadingdongwitcherydoo")
-The average was between:
-the number of trigrams in the query that matched the record, and
-the number of trigrams in the record that matched the query!
+* If it doesn't slow things up too much, prefer short matches when given
+short query strings, i.e. "ama" should rank "Amad" higher than
+"Amalamadingdongwitcherydoo".  Can do this by using the total
+number of trigrams for the given record (or maybe a given word?)
+as a secondary order field.
