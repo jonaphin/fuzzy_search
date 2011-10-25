@@ -1,33 +1,11 @@
-* MyISAM: Consider setting concurrent_insert to 2 on MySQL to make sure we don't
-have nasty locking scenarios when there are holes in the middle
-of the trigrams table. See:
+* Use the subscope variable to allow quicker searches over subsets of
+the data. Support just integers at first (that's all I need for now),
+maybe add support for hashing strings and/or multiple values together
+later.
 
-http://dev.mysql.com/doc/refman/5.0/en/server-system-variables.html#sysvar_concurrent_insert
-
-Or, as an alternate way of doing defragmentation that doesn't block the server
-for ages like OPTIMIZE, perhaps can just rebuild trigrams for the most-recently
-inserted trigram rows until fragmentation no longer in place? In concurrent_insert
-mode 1, this should cause it to reallocate those trigram rows backwards into the hole.
-
-* Probably should go back to using a separate trigrams table for each
-searchable type. That would reduce the record size by a fair bit, and
-simplify any later ideas along the lines of pre-scoped searches (i.e.
-keeping student_school id in the trigrams table for student names).
-
-* Maybe just find the matching trigram with the fewest associated
-records, then do the search within the target table from there?
-Like the second half of this answer:
-http://stackoverflow.com/questions/3320698/what-is-the-best-way-to-implement-a-substring-search-in-sql/3320810#3320810
-This has the disadvantage that if a user makes a typo
-and the typo'd trigram is the winner, then they won't
-see their desired record in the results, and who knows
-if they'll then try to correct their search string or not.
-
-* Or better yet, can use something like the old Badger approach: compare user
-input with Badger-variations of the first N (maybe 4-6 or so) characters of
-each indexed word. Tho, this means that up until they type N characters, they
-won't be able to get matches on anything that isn't actually a word less than
-N characters long.
+* Watch out for interactions between fuzzy_search_limit and scopes.
+If the first 25 results from the search don't fit the scope, the
+user will end up with an empty result set.
 
 * If it doesn't slow things up too much, prefer short matches when given
 short query strings, i.e. "ama" should rank "Amad" higher than
@@ -35,4 +13,12 @@ short query strings, i.e. "ama" should rank "Amad" higher than
 number of trigrams for the given record (or maybe a given word?)
 as a secondary order field.
 
-* Phonetic coding (i.e metaphone)
+* Phonetic coding (i.e metaphone). Needs to be all-or-nothing
+for any given AR model, otherwise we'd have to try searching
+on both coded and raw versions of each query string to match
+against both coded and non-coded properties, which would
+throw away the optimization (although it would still allow
+for phonetic near-matches, which is cool).
+
+Maybe can make this a user-adjustable thing by bringing
+back the 'specify a normalize method' feature.

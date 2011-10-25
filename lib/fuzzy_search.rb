@@ -11,9 +11,8 @@ module ActiveRecord # :nodoc:
 end
 
 require 'fuzzy_model_extensions'
-require 'fuzzy_search_trigram'
-require 'fuzzy_search_type'
 require 'fuzzy_search_ver'
 require 'split_trigrams'
+require 'trigram_model_extensions'
 
-ActiveRecord::Base.send(:include, FuzzySearch::ModelExtensions)
+ActiveRecord::Base.send(:include, FuzzySearch::FuzzyModelExtensions)

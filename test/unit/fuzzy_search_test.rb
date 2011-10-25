@@ -18,7 +18,8 @@ describe "fuzzy_search" do
   after do
     Person.delete_all
     Email.delete_all
-    FuzzySearchTrigram.delete_all
+    Person::FuzzySearchTrigram.delete_all
+    Email::FuzzySearchTrigram.delete_all
   end
 
   it "can search for records with similar strings to a query" do
@@ -95,7 +96,7 @@ describe "fuzzy_search" do
   it "can rebuild the search index from scratch" do
     # FIXME: Have this test make sure that rebuild_fuzzy_search_index! is
     # deleting only the correct old trigrams before regenerating.
-    FuzzySearchTrigram.delete_all
+    Person::FuzzySearchTrigram.delete_all
     assert_empty Person.fuzzy_search("chris")
     Person.rebuild_fuzzy_search_index!
     refute_empty Person.fuzzy_search("chris")
