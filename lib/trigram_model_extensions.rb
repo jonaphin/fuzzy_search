@@ -15,10 +15,29 @@ module FuzzySearch
       end
     end
 
-    def params_for_search(type, search_term)
+    def params_for_search(search_term, opts = {})
       trigrams = FuzzySearch::split_trigrams(search_term)
       # No results for empty search string
       return {:conditions => "0 = 1"} unless trigrams and !trigrams.empty?
+
+      subset = nil
+      if opts[:subset]
+        if (
+        opts[:subset].size == 1 &&
+        opts[:subset].keys.first == target_class.fuzzy_search_subset_property
+        )
+          subset = opts[:subset].values.first.to_i
+          opts.delete(:subset)
+        else
+          # TODO Test me
+          raise "Invalid subset argument #{opts[:subset]}"
+        end
+      end
+
+      unless opts.empty?
+        # TODO Test me
+        raise "Invalid options: #{opts.keys.join(",")}"
+      end
 
       # Retrieve the IDs of the matching items
       search_result = connection.select_rows(
@@ -27,9 +46,10 @@ module FuzzySearch
           "USE INDEX (PRIMARY) " : ""
         ) +
         "WHERE token IN (#{trigrams.map{|t| v(t)}.join(',')}) " +
+        (subset ? "AND subset = #{subset} " : "") +
         "GROUP by rec_id " +
         "ORDER BY count(*) DESC " +
-        "LIMIT #{type.send(:fuzzy_search_limit)}"
+        "LIMIT #{target_class.send(:fuzzy_search_limit)}"
       )
       return {:conditions => "0 = 1"} if search_result.empty?
 
@@ -37,9 +57,10 @@ module FuzzySearch
       static_sql_union = search_result.map{|rec_id, count|
         "SELECT #{v(rec_id)} AS id, #{count} AS score"
       }.join(" UNION ");
+      primary_key_expr = "#{i(target_class.table_name)}.#{i(target_class.primary_key)}"
       return {
         :joins => "INNER JOIN (#{static_sql_union}) AS fuzzy_search_results ON " +
-                  "fuzzy_search_results.id = #{i(target_class.table_name)}.#{i(target_class.primary_key)}",
+                  "fuzzy_search_results.id = #{primary_key_expr}",
         :order => "fuzzy_search_results.score DESC"
       }
     end
@@ -47,14 +68,17 @@ module FuzzySearch
     def update_trigrams(rec)
       delete_trigrams(rec)
 
-      props = target_class.fuzzy_search_properties.map{|p| rec.send(p)}
-      props = props.select{|p| p and p.respond_to?(:to_s)}
-      trigrams = FuzzySearch::split_trigrams(props)
+      values = target_class.fuzzy_search_properties.map{|p| rec.send(p)}
+      values = values.select{|p| p and p.respond_to?(:to_s)}
+      trigrams = FuzzySearch::split_trigrams(values)
+
+      subset_prop = target_class.fuzzy_search_subset_property
+      subset = subset_prop ? rec.send(subset_prop) : 0
 
       # Ar-extensions import, much much faster than individual creates
       import(
-        [:subscope, :token, :rec_id],
-        trigrams.map{|t| [0, t, rec.id]}, # FIXME: Use subscope for something helpful
+        [:subset, :token, :rec_id],
+        trigrams.map{|t| [subset, t, rec.id]},
         :validate => false
       )
     end

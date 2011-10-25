@@ -26,12 +26,11 @@ And then create a search table, and the initial trigrams, for that model:
     $ ./script/generate fuzzy_search_table Person
     $ rake db:migrate
 
-The fuzzy_search method returns arrays:
+The fuzzy_search method returns search results:
 
 ```ruby
 people = Person.fuzzy_search "OReilly"
 ```
-
 It works thru scopes too, including named_scopes and on-the-fly scopes:
 
 ```ruby

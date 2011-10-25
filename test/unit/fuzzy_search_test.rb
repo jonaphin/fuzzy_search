@@ -98,11 +98,17 @@ describe "fuzzy_search" do
     full = Person.fuzzy_search("chris")
     subset = scope.fuzzy_search("chris")
     assert full.size > subset.size
+    assert subset.size > 0
+  end
+
+  it "can use the subscope field to narrow the search range" do
+    full = Person.fuzzy_search("chris")
+    subset = Person.fuzzy_search("chris", :subset => {:favorite_number => 2})
+    assert full.size > subset.size
+    assert subset.size > 0
   end
 
   it "can rebuild the search index from scratch" do
-    # FIXME: Have this test make sure that rebuild_fuzzy_search_index! is
-    # deleting only the correct old trigrams before regenerating.
     Person::FuzzySearchTrigram.delete_all
     assert_empty Person.fuzzy_search("chris")
     Person.rebuild_fuzzy_search_index!

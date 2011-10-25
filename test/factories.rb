@@ -5,6 +5,7 @@ FactoryGirl.define do
     first_name 'John'
     last_name 'Doe'
     hobby 'Flying kites'
+    sequence(:favorite_number) {|n| (n%3) + 1 }
   end
 
   factory :email do

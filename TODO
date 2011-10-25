@@ -22,3 +22,7 @@ for phonetic near-matches, which is cool).
 
 Maybe can make this a user-adjustable thing by bringing
 back the 'specify a normalize method' feature.
+
+* Maybe allow a [trigram,rec_id] to appear multiple times
+under different subsets? Just have to make sure my scoring
+rule counts only unique trigram hits.
