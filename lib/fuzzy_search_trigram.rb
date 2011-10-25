@@ -11,7 +11,7 @@ class FuzzySearchTrigram < ActiveRecord::Base
   def self.params_for_search(type, search_term)
     trigrams = FuzzySearch::split_trigrams(search_term)
     # No results for empty search string
-    return {:conditions => "0 = 1"} unless trigrams
+    return {:conditions => "0 = 1"} unless trigrams and !trigrams.empty?
 
     # Retrieve the IDs of the matching items
     search_result = connection.select_rows(
@@ -26,12 +26,12 @@ class FuzzySearchTrigram < ActiveRecord::Base
 
     # Perform a join between the target table and a fake table of matching ids
     static_sql_union = search_result.map{|rec_id, count|
-      "SELECT #{v(rec_id)} AS fuzzy_search_rec_id, #{v(count)} AS fuzzy_search_score"
+      "SELECT #{v(rec_id)} AS id, #{v(count)} AS score"
     }.join(" UNION ");
     return {
-      :joins => "INNER JOIN (#{static_sql_union}) ON " +
-                "fuzzy_search_rec_id = #{i(type.table_name)}.#{i(type.primary_key)}",
-      :order => "fuzzy_search_score DESC"
+      :joins => "INNER JOIN (#{static_sql_union}) AS fuzzy_search_results ON " +
+                "fuzzy_search_results.id = #{i(type.table_name)}.#{i(type.primary_key)}",
+      :order => "fuzzy_search_results.score DESC"
     }
   end
 
