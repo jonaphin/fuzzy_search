@@ -15,12 +15,10 @@ class CreatePersonFuzzySearchTable < ActiveRecord::Migration
 
     if is_mysql
       ActiveRecord::Base.connection.execute(
-        "alter table #{table.to_s} add primary key (token,rec_id)"
+        "ALTER TABLE #{table.to_s} ENGINE = MyISAM"
       )
-    else
-      add_index table, [:subset, :token, :rec_id], :unique => true
     end
-    add_index table, [:subset]
+    add_index table, [:token, :subset, :rec_id], :name => "full_cover"
     add_index table, [:rec_id]
 
     Person.rebuild_fuzzy_search_index!
