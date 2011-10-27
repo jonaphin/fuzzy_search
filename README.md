@@ -37,6 +37,21 @@ It works thru scopes too, including named_scopes and on-the-fly scopes:
 people = Person.scoped({:conditions => ["state='active'"]}).fuzzy_search("OReilly")
 ```
 
+If you have a very large data set but are typically searching for items
+within a scoped subset of that data, you can get a significant performance
+boost for those searches by having FuzzySearch include the scope-defining
+field (which currently must be an integer) in the search table:
+
+```ruby
+class Person < ActiveRecord::Base
+    # ...
+    fuzzy_searchable_on :first_name, :last_name, :subset_on => :zipcode
+    # ...
+end
+
+bev_hills_people = Person.fuzzy_search("OReilly", :subset => {:zipcode => 90210})
+```
+
 ## Licence and credits
 
 This gem is based on the rails-fuzzy-search plugin by iulianu
