@@ -1,3 +1,7 @@
+* Have the test app's fuzzy search table migrations generated
+automatically by the test suite, instead of having to manually
+update them every time I change the template.
+
 * MyISAM: Consider setting concurrent_insert to 2 on MySQL to make sure we don't
 have nasty locking scenarios when there are holes in the middle
 of the trigrams table. See:
