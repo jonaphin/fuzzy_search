@@ -101,7 +101,7 @@ describe "fuzzy_search" do
     assert subset.size > 0
   end
 
-  it "can use the subscope field to narrow the search range" do
+  it "can use the subset field to narrow the search range" do
     full = Person.fuzzy_search("chris")
     subset = Person.fuzzy_search("chris", :subset => {:favorite_number => 2})
     assert full.size > subset.size
