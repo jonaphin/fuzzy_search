@@ -1,5 +1,5 @@
-# require 'ar-extensions' # External dependency
-require 'activerecord-import'
+require 'ar-extensions' # External dependency
+
 # Monkey patch a bug in ar-extensions which breaks postgres compatibility
 module ActiveRecord # :nodoc:
   module ConnectionAdapters # :nodoc:
