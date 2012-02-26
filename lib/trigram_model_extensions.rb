@@ -1,8 +1,10 @@
+require 'activerecord-import'
+
 module FuzzySearch
   module TrigramModelExtensions
     def set_target_class(cls)
-      write_inheritable_attribute :target_class, cls
-      class_inheritable_reader :target_class
+      class_attribute :target_class, inheritable_accessor: true
+      self.target_class = cls
     end
 
     def rebuild_index
@@ -76,7 +78,7 @@ module FuzzySearch
       subset = subset_prop ? rec.send(subset_prop) : 0
 
       # Ar-extensions import, much much faster than individual creates
-      import(
+      self.import(
         [:subset, :token, :rec_id],
         trigrams.map{|t| [subset, t, rec.id]},
         :validate => false
