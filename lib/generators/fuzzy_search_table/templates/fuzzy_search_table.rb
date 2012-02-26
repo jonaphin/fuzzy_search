@@ -1,7 +1,7 @@
-class <%= migration_name %> < ActiveRecord::Migration
+class <%= @migration_name %> < ActiveRecord::Migration
   def self.up
     is_mysql = ActiveRecord::Base.connection.adapter_name.downcase == 'mysql'
-    table = '<%= table_name %>'.to_sym
+    table = '<%= @table_name %>'.to_sym
 
     create_table table, :id => false do |t|
       t.column :subset, :integer, :limit => 4, :null => false
@@ -21,10 +21,10 @@ class <%= migration_name %> < ActiveRecord::Migration
     add_index table, [:token, :subset, :rec_id], :name => "full_cover"
     add_index table, [:rec_id]
 
-    <%= target_model_name %>.rebuild_fuzzy_search_index!
+    <%= @target_model_name %>.rebuild_fuzzy_search_index!
   end
 
   def self.down
-    drop_table '<%= table_name %>'.to_sym
+    drop_table '<%= @table_name %>'.to_sym
   end
 end
