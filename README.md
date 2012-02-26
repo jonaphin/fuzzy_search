@@ -1,10 +1,11 @@
 # fuzzy_search
 
+
 Search through your models while tolerating slight mis-spellings. If you have a Person in your database named O'Reilly, you want your users to be able to find it even if they type "OReilly" or "O'Rielly".
 
 This gem is not as powerful as dedicated search tools like Solr, but it's much easier to set up and more appropriate for searching small strings, such names of people or products. It uses your regular database, rather than an external service that has to be maintained separately.
 
-Currently only Rails 2 is supported. I welcome any contributions that resolve this!
+** Update **: This is the Rails 3 version of the plugin.
 
 ## Installation
 
