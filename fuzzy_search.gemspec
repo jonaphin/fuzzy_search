@@ -15,6 +15,7 @@ gemspec = Gem::Specification.new do |s|
   s.rubyforge_project = '[none]'
 
   # s.add_dependency('ar-extensions', '0.9.5')
+  s.add_dependency('activerecord-import')
 end
 
 # Gem::PackageTask.new(gemspec) do |pkg|
