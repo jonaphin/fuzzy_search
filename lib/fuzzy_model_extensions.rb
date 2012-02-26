@@ -3,14 +3,13 @@ require 'set'
 module FuzzySearch
   module FuzzyModelExtensions
     def self.included(base)
-      {
-        :fuzzy_search_properties => [],
-        :fuzzy_search_limit => 25,
-        :fuzzy_search_subset_property => nil
-      }.each do |key, value|
-        base.write_inheritable_attribute key, value
-        base.class_inheritable_reader key
-      end
+      base.class_attribute :fuzzy_search_properties, instance_accessor: true
+      base.class_attribute :fuzzy_search_limit, instance_accessor: true
+      base.class_attribute :fuzzy_search_subset_property, instance_accessor: true
+      
+      base.fuzzy_search_properties = []
+      base.fuzzy_search_limit = 25
+      base.fuzzy_search_subset_property = nil
 
       base.extend ClassMethods
     end
@@ -20,9 +19,11 @@ module FuzzySearch
         # TODO: Complain if fuzzy_searchable_on is called more than once
         # TODO: Complain if no properties were given
         options = properties.last.is_a?(Hash) ? properties.pop : {}
-        write_inheritable_attribute :fuzzy_search_properties, properties
+        class_attribute :fuzzy_search_properties, instance_accessor: true
+        self.fuzzy_search_properties = properties
         if options[:subset_on]
-          write_inheritable_attribute :fuzzy_search_subset_property, options[:subset_on]
+          class_attribute :fuzzy_search_subset_property, instance_accessor: true
+          self.fuzzy_search_subset_property = options[:subset_on]
           options.delete(:subset_on)
         end
 
@@ -31,10 +32,10 @@ module FuzzySearch
           raise "Invalid options: #{options.keys.join(",")}"
         end
 
-        named_scope :fuzzy_search_scope, lambda { |words|
+        scope :fuzzy_search_scope, lambda { |words|
           fuzzy_search_scope_with_opts(words, {})
         }
-        named_scope :fuzzy_search_scope_with_opts, lambda { |words, opts|
+        scope :fuzzy_search_scope_with_opts, lambda { |words, opts|
           self::FuzzySearchTrigram.params_for_search(words, opts)
         }
         extend FuzzySearchClassMethods
